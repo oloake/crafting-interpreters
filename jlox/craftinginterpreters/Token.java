@@ -1,4 +1,4 @@
-package craftinginterpretors;
+package craftinginterpreters;
 
 class Token {
 	final TokenType type;

@@ -1,1 +1,1 @@
-javac -cp . -d bin craftinginterpretors/*.java
+javac -cp . -d bin craftinginterpreters/*.java
