@@ -1,4 +1,4 @@
-package craftinginterpreters;
+package craftinginterpretors;
 
 enum TokenType {
 
