@@ -98,6 +98,7 @@ class Scanner {
                 break;
             case '/':
                 if (match('/')) {
+                    //Comment till end of line
                     while (peek() != '\n' && !isAtEnd()) {
                         advance();
                     }
