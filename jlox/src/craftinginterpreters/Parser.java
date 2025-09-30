@@ -6,6 +6,8 @@ import java.util.List;
 
 import static craftinginterpreters.TokenType.COMMA;
 import static craftinginterpreters.TokenType.IDENTIFIER;
+import static craftinginterpreters.TokenType.LEFT_BRACE;
+import static craftinginterpreters.TokenType.RIGHT_BRACE;
 import static craftinginterpreters.TokenType.RIGHT_PAREN;
 
 class Parser {
@@ -32,11 +34,28 @@ class Parser {
             if (match(TokenType.VAR)) {
                 return varDeclaration();
             }
+            if (match(TokenType.CLASS)) {
+                return classDeclaration();
+            }
             return statement();
         } catch (ParseError error) {
             synchronize();
             return null;
         }
+    }
+
+    private Stmt classDeclaration() {
+        Token name = consume(IDENTIFIER, "Expect class name.");
+        consume(LEFT_BRACE, "Expect '{' before class body.");
+
+        List<Stmt.Function> methods = new ArrayList<>();
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            methods.add(function("method"));
+        }
+
+        consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+        return new Stmt.Class(name, methods);
     }
 
     private Stmt.Function function(String kind) {
@@ -55,7 +74,7 @@ class Parser {
         }
         consume(RIGHT_PAREN, "Expect ')' after parameters.");
 
-        consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
         List<Stmt> body = block();
         return new Stmt.Function(name, parameters, body);
     }
@@ -64,7 +83,7 @@ class Parser {
         if (match(TokenType.PRINT)) {
             return printStatement();
         }
-        if (match(TokenType.LEFT_BRACE)) {
+        if (match(LEFT_BRACE)) {
             return new Stmt.Block(block());
         }
         if (match(TokenType.IF)) {
@@ -167,11 +186,11 @@ class Parser {
     private List<Stmt> block() {
         List<Stmt> statements = new ArrayList<>();
 
-        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
             statements.add(declaration());
         }
 
-        consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+        consume(RIGHT_BRACE, "Expect '}' after block.");
         return statements;
     }
 
@@ -209,6 +228,9 @@ class Parser {
             if (expr instanceof Expr.Variable) {
                 Token name = ((Expr.Variable)expr).name;
                 return new Expr.Assign(name, value);
+            } else if (expr instanceof Expr.Get) {
+                Expr.Get get = (Expr.Get)expr;
+                return new Expr.Set(get.object, get.name, value);
             }
 
             error(equals, "Invalid assignment target.");
@@ -309,6 +331,9 @@ class Parser {
         while (true) {
             if (match(TokenType.LEFT_PAREN)) {
                 expr = finishCall(expr);
+            } else if (match(TokenType.DOT)){
+                Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name);
             } else {
                 break;
             }
@@ -353,6 +378,9 @@ class Parser {
         }
         if (match(IDENTIFIER)) {
             return new Expr.Variable(previous());
+        }
+        if (match(TokenType.THIS)) {
+            return new Expr.This(previous());
         }
         throw error(peek(), "Expect expression.");
     }
