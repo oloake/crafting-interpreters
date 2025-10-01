@@ -21,6 +21,7 @@ public class GenerateAst {
                 "Call     : Expr callee, Token paren, List<Expr> arguments",
                 "Get      : Expr object, Token name",
                 "Set      : Expr object, Token name, Expr value",
+                "Super    : Token keyword, Token method",
                 "This     : Token keyword",
                 "Logical  : Expr left, Token operator, Expr right",
                 "Grouping : Expr expression",
@@ -31,7 +32,8 @@ public class GenerateAst {
 
         defineAst(outputDir, "Stmt", Arrays.asList(
                 "Block      : List<Stmt> statements",
-                "Class      : Token name, List<Stmt.Function> methods",
+                "Class      : Token name, Expr.Variable superclass," +
+                            " List<Stmt.Function> methods",
                 "If         : Expr condition, Stmt thenBranch," +
                             " Stmt elseBranch",
                 "Expression : Expr expression",
