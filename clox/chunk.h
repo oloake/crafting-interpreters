@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "value.h"
+#include "chunk.h"
 
 
 typedef enum {
@@ -29,6 +30,7 @@ typedef enum {
   OP_JUMP_IF_FALSE,
   OP_JUMP,
   OP_LOOP,
+  OP_CALL,
   OP_RETURN,
 } OpCode;
 
