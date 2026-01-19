@@ -21,6 +21,7 @@ typedef struct {
   Value* stackTop;
   Table strings;
   Table globals;
+  ObjString* initString;
   size_t bytesAllocated;
   size_t nextGC;
   Obj* objects;

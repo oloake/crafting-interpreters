@@ -29,6 +29,7 @@ static Obj* allocateObject(size_t size, ObjType type) {
 ObjClass* newClass(ObjString* name) {
   ObjClass* klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
   klass->name = name; 
+  initTable(&klass->methods);
   return klass;
 }
 
@@ -44,6 +45,16 @@ ObjClosure* newClosure(ObjFunction* function) {
   closure->upvalueCount = function->upvalueCount;
   return closure;
 }
+
+ObjBoundMethod* newBoundMethod(Value receiver,
+                               ObjClosure* method) {
+  ObjBoundMethod* bound = ALLOCATE_OBJ(ObjBoundMethod,
+                                       OBJ_BOUND_METHOD);
+  bound->receiver = receiver;
+  bound->method = method;
+  return bound;
+}
+
     
 static ObjString* allocateString(char* chars, int length,
                                  uint32_t hash) {
@@ -139,7 +150,10 @@ void printObject(Value value) {
       break;
     case OBJ_CLASS:
       printf("%s", AS_CLASS(value)->name->chars);
-      break; 
+      break;
+    case OBJ_BOUND_METHOD:
+      printFunction(AS_BOUND_METHOD(value)->method->function);
+      break;  
     case OBJ_INSTANCE:
       printf("%s instance",
              AS_INSTANCE(value)->klass->name->chars);
